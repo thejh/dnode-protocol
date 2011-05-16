@@ -32,9 +32,13 @@ The arguments field contains the data to supply the remote method or callback.
 The callbacks field maps an integral callback ID to an Array of elements
 representing the callback's path in the arguments structure. For instance,
 an arguments array before transformation of
+
     [ 50, 3, { "b" : function () {}, "c" : 4 }, function () {} ]
+
 could result in a callback field of
+
     { 103 : [ 2, "b" ], 104 : [ 3 ] }
+
 if the functions were assigned IDs of 103 and 104 from left to right
 respectively. Function 103 is in the object at element index 2 and at the key
 "b", so its path is [ 2, "b" ]. Function 104 is just at index 3 in the argument
@@ -55,6 +59,7 @@ a single element: the object that should be wrapped. The callbacks field is
 populated from the arguments array given the procedure above.
 
 Example of this initial methods message:
+
     {
         "method" : "methods",
         "arguments" : [ { "timesTen" : "[Function]", "moo" : "[Function]" } ],
@@ -76,6 +81,7 @@ values of the "from" and "two" keys are array encoding paths through the data
 structure from the root, as in the "callbacks" field.
 
 Example of a method call with cyclic references:
+
     {
         "method" : 12,
         "arguments" : [ { "a" : 5, "b" : [ { "c" : 5 } ] } ],
