@@ -1,5 +1,5 @@
 var assert = require('assert');
-var Scrubber = require('dnode-protocol').Scrubber;
+var Scrubber = require('../').Scrubber;
 
 exports.noFuncs = function () {
     var s = new Scrubber;
@@ -76,4 +76,22 @@ exports.multilink = function () {
             { from : [], to : [ '3' ] },
         ],
     });
+};
+
+exports.enumLink = function () {
+    var s = new Scrubber;
+    var req = {
+        method : 0,
+        arguments : [ 33, '[Function]' ],
+        callbacks : { 0 : [ '1' ] },
+        links : [ {
+            from : [ '0' ],
+            to : [ '1', 'constructor', 'prototype', 'beep' ]
+        } ]
+    };
+    
+    var args = s.unscrub(req, function (id) {
+        return function () {};
+    });
+    assert.ok(!(function () {}).beep, 'created non-enumerable property');
 };
