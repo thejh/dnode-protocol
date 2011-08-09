@@ -119,13 +119,13 @@ exports.skipSet = function () {
     var s = new Scrubber;
     var req = {
         method : 0,
-        arguments : [ 33, '[Function]' ],
+        arguments : [ { x : 33 }, '[Function]' ],
         callbacks : { 0 : [ '1' ] },
-        links : [ { from : [ '0' ], to : [ '2' ] } ]
+        links : [ { from : [ '0', 'x' ], to : [ '2' ] } ]
     };
     
     var args = s.unscrub(req, function (id) {
         return function () {};
     });
-    assert.equal(args[1], 33);
+    assert.equal(args[2], 33);
 };
