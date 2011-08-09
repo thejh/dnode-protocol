@@ -78,7 +78,7 @@ exports.multilink = function () {
     });
 };
 
-exports.enumLink = function () {
+exports.enumSetLink = function () {
     var s = new Scrubber;
     var req = {
         method : 0,
@@ -94,4 +94,23 @@ exports.enumLink = function () {
         return function () {};
     });
     assert.ok(!(function () {}).beep, 'created non-enumerable property');
+};
+
+exports.enumGetLink = function () {
+    var s = new Scrubber;
+    var req = {
+        method : 0,
+        arguments : [ 'doom', '[Function]' ],
+        callbacks : { 0 : [ '1' ] },
+        links : [ {
+            from : [ '1', 'constructor', 'prototype', 'toString' ],
+            to : [ '0' ]
+        } ]
+    };
+    
+    var args = s.unscrub(req, function (id) {
+        return function () {};
+    });
+    
+    assert.equal(args[0], 'doom');
 };
