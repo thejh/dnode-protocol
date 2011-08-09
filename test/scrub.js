@@ -114,3 +114,18 @@ exports.enumGetLink = function () {
     
     assert.ok(args[0] === undefined);
 };
+
+exports.skipSet = function () {
+    var s = new Scrubber;
+    var req = {
+        method : 0,
+        arguments : [ 33, '[Function]' ],
+        callbacks : { 0 : [ '1' ] },
+        links : [ { from : [ '0' ], to : [ '2' ] } ]
+    };
+    
+    var args = s.unscrub(req, function (id) {
+        return function () {};
+    });
+    assert.equal(args[1], 33);
+};
