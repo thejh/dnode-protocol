@@ -195,7 +195,7 @@ var Scrubber = exports.Scrubber = function () {
     
     function setAt (ref, path, value) {
         var node = ref;
-        for (var i = 0; i < path.length - 2; i++) {
+        for (var i = 0; i < path.length - 1; i++) {
             var key = path[i];
             if (Object.propertyIsEnumerable.call(node, key)) {
                 node = node[key];
