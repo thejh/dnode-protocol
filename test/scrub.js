@@ -112,5 +112,5 @@ exports.enumGetLink = function () {
         return function () {};
     });
     
-    assert.equal(args[0], 'doom');
+    assert.ok(args[0] === undefined);
 };

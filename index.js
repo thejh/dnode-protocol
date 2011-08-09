@@ -213,9 +213,13 @@ var Scrubber = exports.Scrubber = function () {
     }
     
     function getAt (node, path) {
-        path.forEach(function (key) {
-            node = node[key];
-        });
+        for (var i = 0; i < path.length; i++) {
+            var key = path[i];
+            if (Object.propertyIsEnumerable.call(node, key)) {
+                node = node[key];
+            }
+            else return undefined;
+        }
         return node;
     }
     
