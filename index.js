@@ -154,7 +154,15 @@ var Scrubber = exports.Scrubber = function () {
                     paths[i] = this.path;
                 }
                 else {
-                    self.callbacks[cbId] = node;
+                    var id = cbId;
+                    self.callbacks[id] = function() {
+                      node.apply(this, [].slice.call(arguments));
+                      if (node.name == '') {
+                        // HACK: function was anonymous, delete our references to it
+                        delete self.callbacks[id];
+                        delete wrapped[wrapped.indexOf(node)];
+                      }
+                    };;
                     wrapped.push(node);
                     paths[cbId] = this.path;
                     cbId++;
