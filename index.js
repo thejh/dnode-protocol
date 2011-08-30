@@ -78,6 +78,12 @@ var Session = exports.Session = function (id, wrapper) {
                 // for a particular id
                 wrapped[id] = function () {
                     self.request(id, [].slice.apply(arguments));
+                    if (typeof wrapped[id].times == 'number') {
+                        wrapped[id].times--;
+                        if (wrapped[id].times == 0) {
+                            delete wrapped[id];
+                        }
+                    }
                 };
             }
             return wrapped[id];
@@ -157,10 +163,12 @@ var Scrubber = exports.Scrubber = function () {
                     var id = cbId;
                     self.callbacks[id] = function() {
                         node.apply(this, [].slice.call(arguments));
-                        node.times--;
-                        if (node.times == 0) {
-                            delete self.callbacks[id];
-                            delete wrapped[wrapped.indexOf(node)];
+                        if (typeof node.times == 'number') {
+                            node.times--;
+                            if (node.times == 0) {
+                                delete self.callbacks[id];
+                                delete wrapped[wrapped.indexOf(node)];
+                            }
                         }
                     };
                     wrapped.push(node);
