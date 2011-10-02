@@ -76,11 +76,14 @@ var Session = exports.Session = function (id, wrapper) {
             if (!(id in wrapped)) {
                 // create a new function only if one hasn't already been created
                 // for a particular id
-                wrapped[id] = function () {
+                wrapped[id] = weak({f: function () {
                     self.request(id, [].slice.apply(arguments));
-                };
+                }}, function() {
+                    // TODO: tell the other side here
+                    delete wrapped[id];
+                });
             }
-            return wrapped[id];
+            return wrapped[id].f;
         });
         
         if (req.method === 'methods') {
