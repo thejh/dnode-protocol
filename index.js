@@ -241,6 +241,7 @@ var Store = exports.Store = function() {
     };
     
     self.get = function (id) {
+        if (!self.has(id)) return null;
         return wrap(items[id]);
     };
     
