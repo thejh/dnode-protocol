@@ -150,10 +150,7 @@ var Session = exports.Session = function (id, wrapper) {
 var Scrubber = exports.Scrubber = function (store) {
     var self = {};
     store = store || new Store;
-    
-    self.__defineGetter__('callbacks', function () {
-        return store.items;
-    });
+    self.callbacks = store.items;
     
     // Take the functions out and note them for future use
     self.scrub = function (obj) {
