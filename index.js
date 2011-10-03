@@ -39,10 +39,10 @@ var Session = exports.Session = function (id, wrapper) {
             : wrapper || {}
     ;
     
-    self.local_store = new Store;
-    self.remote_store = new Store;
+    self.localStore = new Store;
+    self.remoteStore = new Store;
     
-    self.local_store.on('cull', function (id) {
+    self.localStore.on('cull', function (id) {
         self.emit('request', {
             method : 'cull',
             arguments : [id],
@@ -50,7 +50,7 @@ var Session = exports.Session = function (id, wrapper) {
         });
     });
     
-    var scrubber = new Scrubber(self.local_store);
+    var scrubber = new Scrubber(self.localStore);
     
     self.start = function () {
         self.request('methods', [ instance ]);
@@ -83,14 +83,14 @@ var Session = exports.Session = function (id, wrapper) {
     
     self.handle = function (req) {
         var args = scrubber.unscrub(req, function (id) {
-            if (!self.remote_store.has(id)) {
+            if (!self.remoteStore.has(id)) {
                 // create a new function only if one hasn't already been created
                 // for a particular id
-                self.remote_store.add(function () {
+                self.remoteStore.add(function () {
                     self.request(id, [].slice.apply(arguments));
                 }, id);
             }
-            return self.remote_store.get(id);
+            return self.remoteStore.get(id);
         });
         
         if (req.method === 'methods') {
@@ -102,7 +102,7 @@ var Session = exports.Session = function (id, wrapper) {
         }
         else if (req.method === 'cull') {
             args.forEach(function (id) {
-                self.remote_store.cull(args);
+                self.remoteStore.cull(args);
             });
         }
         else if (typeof req.method === 'string') {
@@ -116,7 +116,7 @@ var Session = exports.Session = function (id, wrapper) {
             }
         }
         else if (typeof req.method == 'number') {
-            apply(self.local_store.get(req.method), self.instance, args);
+            apply(self.localStore.get(req.method), self.instance, args);
         }
     }
     
@@ -274,11 +274,11 @@ var Store = exports.Store = function() {
     function wrap (fn) {
         return function() {
             fn.apply(this, arguments);
-            auto_cull(fn);
+            autoCull(fn);
         };
     }
     
-    function auto_cull (fn) {
+    function autoCull (fn) {
         if (typeof fn.times == 'number') {
             fn.times--;
             if (fn.times == 0) {
