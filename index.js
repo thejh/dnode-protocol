@@ -135,27 +135,28 @@ var Session = exports.Session = function (id, wrapper) {
 var Scrubber = exports.Scrubber = function () {
     var self = {};
     self.callbacks = {};
-    var wrapped = [];
+    self.lastUsed = {};
     
     var cbId = 0;
     
     // Take the functions out and note them for future use
-    self.scrub = function (obj) {
+    self.scrub = function (obj, counter) {
         var paths = {};
         var links = [];
         
         var args = Traverse(obj).map(function (node) {
             if (typeof(node) == 'function') {
-                var i = wrapped.indexOf(node);
+                var i = numKeyOf(self.callbacks, node);
                 if (i >= 0 && !(i in paths)) {
                     // Keep previous function IDs only for the first function
                     // found. This is somewhat suboptimal but the alternatives
                     // are worse.
                     paths[i] = this.path;
+                    self.lastUsed[i] = counter;
                 }
                 else {
                     self.callbacks[cbId] = node;
-                    wrapped.push(node);
+                    self.lastUsed[cbId] = counter;
                     paths[cbId] = this.path;
                     cbId++;
                 }
@@ -265,3 +266,11 @@ var parseArgs = exports.parseArgs = function (argv) {
     
     return params;
 };
+
+function numKeyOf(obj, value) {
+  var keys = Object.keys(obj).filter(function(keysValue) {
+    return keysValue === value;
+  });
+  if (keys.length === 1) return +keys[0];
+  return -1;
+}
