@@ -45,10 +45,12 @@ var Session = exports.Session = function (id, wrapper) {
         self.request('methods', [ instance ]);
     };
     
+    self.counter = 0;
     self.request = function (method, args) {
-        var scrub = scrubber.scrub(args);
+        var scrub = scrubber.scrub(args, self.counter);
         
         self.emit('request', {
+            counter: self.counter++,
             method : method,
             arguments : scrub.arguments,
             callbacks : scrub.callbacks,
@@ -76,12 +78,18 @@ var Session = exports.Session = function (id, wrapper) {
             if (!(id in wrapped)) {
                 // create a new function only if one hasn't already been created
                 // for a particular id
-                wrapped[id] = function () {
+                wrapped[id] = {f: function () {
                     self.request(id, [].slice.apply(arguments));
-                };
+                }};
+                self.emit('wrapped', id, wrapped);
             }
-            return wrapped[id];
+            return wrapped[id].f;
         });
+        
+        if (typeof req.counter === 'number') {
+            console.log('  remote counter value bumped to '+req.counter);
+            self.remoteMessageCounter = req.counter;
+        }
         
         if (req.method === 'methods') {
             handleMethods(args[0]);
@@ -89,6 +97,14 @@ var Session = exports.Session = function (id, wrapper) {
         else if (req.method === 'error') {
             var methods = args[0];
             self.emit('remoteError', methods);
+        }
+        else if (req.method === 'unusedFunction') {
+            console.log('GC-able: '+(+req.id)+' (as of req '+(+req.asOfCounter)+' (if it\'s >= '+scrubber.lastUsed[+req.id]+'))');
+            if (+req.asOfCounter >= scrubber.lastUsed[+req.id]) {
+                delete scrubber.callbacks[+req.id];
+                delete scrubber.lastUsed[+req.id];
+                console.log("GC'ed "+(+req.id));
+            }
         }
         else if (typeof req.method === 'string') {
             if (self.instance.propertyIsEnumerable(req.method)) {
