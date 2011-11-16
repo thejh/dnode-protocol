@@ -111,12 +111,12 @@ var Session = exports.Session = function (id, wrapper) {
         }
         else if (req.method === 'cull') {
             args.forEach(function (id) {
-                self.remoteStore.cull(args);
+                self.remoteStore.cull(id);
             });
         }
         else if (req.method === 'cullYours') {
             args.forEach(function (id) {
-                self.localStore.cull(args);
+                self.localStore.cull(id);
             });
         }
         else if (typeof req.method === 'string') {
@@ -271,14 +271,10 @@ var Store = exports.Store = function() {
         return id;
     };
     
-    self.cull = function (arg) {
-        for (var i in items) {
-            if (items.hasOwnProperty(i) && items[i].f === arg) {
-                delete items[i];
-                return i;
-            }
-        }
-        return -1;
+    self.cull = function (i) {
+        if (!items.hasOwnProperty(i)) return -1;
+        delete items[i];
+        return i;
     };
     
     self.indexOf = function (fn) {
