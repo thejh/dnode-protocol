@@ -272,6 +272,14 @@ var Store = exports.Store = function() {
     };
     
     self.cull = function (i) {
+        if (typeof i === 'function') {
+            Object.keys(items).some(function(key) {
+                if (key === i) {
+                    i = key;
+                    return true;
+                }
+            });
+        }
         if (!items.hasOwnProperty(i)) return -1;
         delete items[i];
         return i;
