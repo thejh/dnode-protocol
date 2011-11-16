@@ -51,6 +51,14 @@ var Session = exports.Session = function (id, wrapper) {
         });
     });
     
+    self.remoteStore.on('cull', function (id) {
+        self.emit('request', {
+            method : 'cullYours',
+            arguments : [id],
+            callbacks : {}
+        });
+    });
+    
     var scrubber = new Scrubber(self.localStore);
     
     self.start = function () {
@@ -106,6 +114,11 @@ var Session = exports.Session = function (id, wrapper) {
                 self.remoteStore.cull(args);
             });
         }
+        else if (req.method === 'cullYours') {
+            args.forEach(function (id) {
+                self.localStore.cull(args);
+            });
+        }
         else if (typeof req.method === 'string') {
             if (self.instance.propertyIsEnumerable(req.method)) {
                 apply(self.instance[req.method], self.instance, args);
@@ -151,7 +164,6 @@ var Session = exports.Session = function (id, wrapper) {
 var Scrubber = exports.Scrubber = function (store) {
     var self = {};
     store = store || new Store;
-    self.callbacks = store.items;
     
     // Take the functions out and note them for future use
     self.scrub = function (obj) {
@@ -240,7 +252,8 @@ var Scrubber = exports.Scrubber = function (store) {
 
 var Store = exports.Store = function() {
     var self = new EventEmitter;
-    var items = self.items = [];
+    var items = self.items = {};
+    var counter = 1;
     
     self.has = function (id) {
         return items[id] != undefined;
@@ -248,25 +261,35 @@ var Store = exports.Store = function() {
     
     self.get = function (id) {
         if (!self.has(id)) return null;
-        return wrap(items[id]);
+        return wrap(items[id].f);
     };
     
     self.add = function (fn, id) {
-        if (id == undefined) id = items.length;
-        items[id] = fn;
+        if (id == undefined) id = counter++;
+        items[id] = {f: fn};
+        self.emit('wrapped', id, items);
         return id;
     };
     
     self.cull = function (arg) {
-        if (typeof arg == 'function') {
-            arg = items.indexOf(arg);
+        for (var i in items) {
+            if (items.hasOwnProperty(i) && items[i].f === arg) {
+                delete items[i];
+                return i;
+            }
         }
-        delete items[arg];
-        return arg;
+        return -1;
     };
     
     self.indexOf = function (fn) {
-        return items.indexOf(fn);
+        var result = -1;
+        Object.keys(items).some(function(key) {
+            if (items[key] === fn) {
+                result = key;
+                return true;
+            }
+        })
+        return result;
     };
     
     function wrap (fn) {
