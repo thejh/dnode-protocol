@@ -274,7 +274,7 @@ var Store = exports.Store = function() {
     self.cull = function (i) {
         if (typeof i === 'function') {
             Object.keys(items).some(function(key) {
-                if (key === i) {
+                if (items[key].f === i) {
                     i = key;
                     return true;
                 }
