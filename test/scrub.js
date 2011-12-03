@@ -36,10 +36,10 @@ exports.funcs = function () {
         links : [],
     });
     
-    s.callbacks[0]();
+    s.callbacks[0].f();
     assert.eql(calls, { f : 1, g : 0 });
     
-    s.callbacks[1]();
+    s.callbacks[1].f();
     assert.eql(calls, { f : 1, g : 1 });
 };
 
