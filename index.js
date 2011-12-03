@@ -253,7 +253,7 @@ var Scrubber = exports.Scrubber = function (store) {
 var Store = exports.Store = function() {
     var self = new EventEmitter;
     var items = self.items = {};
-    var counter = 1;
+    var counter = 0;
     
     self.has = function (id) {
         return items[id] != undefined;
